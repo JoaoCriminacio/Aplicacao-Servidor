@@ -1,5 +1,8 @@
 package com.unimater.model;
 
+import com.unimater.dao.ProductDAO;
+
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -9,12 +12,12 @@ public class SaleItem implements Entity{
     private int quantity;
     private double percentualDiscount;
 
-    public SaleItem(ResultSet rs) throws SQLException {
+    public SaleItem(ResultSet rs, Connection connection) throws SQLException {
         super();
         this.id = rs.getInt("id");
-        this.product = new Product(rs);
+        this.product = getProduct(connection, id);
         this.quantity = rs.getInt("quantity");
-        this.percentualDiscount = rs.getDouble("percentualDiscount");
+        this.percentualDiscount = rs.getDouble("percentual_discount");
     }
 
     public SaleItem(int id, Product product, int quantity, double percentualDiscount) {
@@ -52,9 +55,14 @@ public class SaleItem implements Entity{
         this.percentualDiscount = percentualDiscount;
     }
 
+    private Product getProduct(Connection connection, int productId) {
+        ProductDAO productDao = new ProductDAO(connection);
+        return productDao.getById(productId);
+    }
+
     @Override
-    public Entity constructFromResultSet(ResultSet rs) throws SQLException {
-        return new SaleItem(rs);
+    public Entity constructFromResultSet(ResultSet rs, Connection connection) throws SQLException {
+        return new SaleItem(rs, connection);
     }
 
     @Override

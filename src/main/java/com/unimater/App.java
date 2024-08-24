@@ -2,8 +2,7 @@ package com.unimater;
 
 import com.sun.net.httpserver.HttpServer;
 import com.unimater.controller.HelloWorldHandler;
-import com.unimater.dao.ProductDAO;
-import com.unimater.dao.ProductTypeDAO;
+import com.unimater.dao.*;
 import com.unimater.model.ProductType;
 import com.unimater.dao.ProductDAO;
 import com.unimater.model.Product;

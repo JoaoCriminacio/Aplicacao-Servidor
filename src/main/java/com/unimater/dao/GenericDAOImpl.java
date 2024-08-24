@@ -23,18 +23,18 @@ public abstract class GenericDAOImpl<T extends Entity> implements GenericDAO<T> 
 
     @Override
     public List<T> getAll() {
-        List<T> productTypes = new ArrayList<>();
+        List<T> returningObejct = new ArrayList<>();
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName);
             while (rs.next()) {
-                T productType = (T) supplier.get().constructFromResultSet(rs);
-                productTypes.add(productType);
+                T type = (T) supplier.get().constructFromResultSet(rs, connection);
+                returningObejct.add(type);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return productTypes;
+        return returningObejct;
     }
 
     @Override
@@ -45,8 +45,8 @@ public abstract class GenericDAOImpl<T extends Entity> implements GenericDAO<T> 
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                returningObject = (T) supplier.get().constructFromResultSet(rs);
+            while (rs.next()) {
+                returningObject = (T) supplier.get().constructFromResultSet(rs, connection);
             }
         } catch (SQLException e) {
             e.printStackTrace();

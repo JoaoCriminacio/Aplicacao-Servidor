@@ -1,5 +1,6 @@
 package com.unimater.model;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -10,7 +11,7 @@ public class Product implements Entity{
     private String description;
     private double value;
 
-    public Product(ResultSet rs) throws SQLException {
+    public Product(ResultSet rs, Connection connection) throws SQLException {
         super();
         this.id = rs.getInt("id");
         this.productType = new ProductType(rs);
@@ -50,8 +51,8 @@ public class Product implements Entity{
     }
 
     @Override
-    public Entity constructFromResultSet(ResultSet rs) throws SQLException {
-        return new Product(rs);
+    public Entity constructFromResultSet(ResultSet rs, Connection connection) throws SQLException {
+        return new Product(rs, connection);
     }
 
     @Override
