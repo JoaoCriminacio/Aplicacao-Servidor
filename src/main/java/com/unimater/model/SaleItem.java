@@ -1,8 +1,6 @@
 package com.unimater.model;
 
-import com.unimater.dao.ProductDAO;
-
-import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -12,14 +10,6 @@ public class SaleItem implements Entity{
     private int quantity;
     private double percentualDiscount;
 
-    public SaleItem(ResultSet rs, Connection connection) throws SQLException {
-        super();
-        this.id = rs.getInt("id");
-        this.product = getProduct(connection, id);
-        this.quantity = rs.getInt("quantity");
-        this.percentualDiscount = rs.getDouble("percentual_discount");
-    }
-
     public SaleItem(int id, Product product, int quantity, double percentualDiscount) {
         this.id = id;
         this.product = product;
@@ -27,10 +17,33 @@ public class SaleItem implements Entity{
         this.percentualDiscount = percentualDiscount;
     }
 
-    public SaleItem() {
-
+    public SaleItem(ResultSet rs) throws SQLException {
+        this.id = rs.getInt("id");
+        this.quantity = rs.getInt("quantity");
+        this.percentualDiscount = rs.getDouble("percentual_discount");
+        this.product = new Product(rs.getInt("product_id"));
     }
 
+    public SaleItem() {
+    }
+
+    @Override
+    public Entity constructFromResultSet(ResultSet rs) throws SQLException {
+        return new SaleItem(rs);
+    }
+
+    @Override
+    public PreparedStatement prepareStatement(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setInt(1, getProduct().getId());
+        preparedStatement.setInt(2, getQuantity());
+        preparedStatement.setDouble(3, getPercentualDiscount());
+        return preparedStatement;
+    }
+    public PreparedStatement prepareStatement(PreparedStatement preparedStatement, Sale sale) throws SQLException{
+        preparedStatement = prepareStatement(preparedStatement);
+        preparedStatement.setInt(4, sale.getId());
+        return preparedStatement;
+    }
     public int getId() {
         return id;
     }
@@ -55,14 +68,8 @@ public class SaleItem implements Entity{
         this.percentualDiscount = percentualDiscount;
     }
 
-    private Product getProduct(Connection connection, int productId) {
-        ProductDAO productDao = new ProductDAO(connection);
-        return productDao.getById(productId);
-    }
-
-    @Override
-    public Entity constructFromResultSet(ResultSet rs, Connection connection) throws SQLException {
-        return new SaleItem(rs, connection);
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     @Override

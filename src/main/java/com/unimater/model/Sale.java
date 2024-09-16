@@ -1,33 +1,43 @@
 package com.unimater.model;
 
-import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 
-public class Sale implements Entity{
+public class Sale implements Entity {
 
     private int id;
     private List<SaleItem> saleItems;
-    private Timestamp insert_at;
-
-    public Sale(ResultSet rs, Connection connection) throws SQLException {
-        super();
-        this.id = rs.getInt("id");
-        this.saleItems = new ArrayList<>();
-        this.insert_at = rs.getTimestamp("insert_at");
-    }
+    private Timestamp insertAt;
 
     public Sale(int id, List<SaleItem> saleItems, Timestamp insertAt) {
         this.id = id;
         this.saleItems = saleItems;
-        this.insert_at = insertAt;
+        this.insertAt = insertAt;
+    }
+
+    public Sale(ResultSet rs) throws SQLException{
+        this.id = rs.getInt("id");
+        this.insertAt = rs.getTimestamp("insert_at");
     }
 
     public Sale() {
 
+    }
+
+    @Override
+    public Entity constructFromResultSet(ResultSet rs) throws SQLException {
+        return new Sale(rs);
+    }
+
+    @Override
+    public PreparedStatement prepareStatement(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setInt(1, getId());
+        preparedStatement.setTimestamp(2, Timestamp.from(Instant.now()));
+        return preparedStatement;
     }
 
     public int getId() {
@@ -47,16 +57,11 @@ public class Sale implements Entity{
     }
 
     public Timestamp getInsertAt() {
-        return insert_at;
+        return insertAt;
     }
 
     public void setInsertAt(Timestamp insertAt) {
-        this.insert_at = insertAt;
-    }
-
-    @Override
-    public Entity constructFromResultSet(ResultSet rs, Connection connection) throws SQLException {
-        return new Sale(rs, connection);
+        this.insertAt = insertAt;
     }
 
     @Override
@@ -64,7 +69,7 @@ public class Sale implements Entity{
         return "Sale{" +
                 "id=" + id +
                 ", saleItems=" + saleItems +
-                ", insertAt=" + insert_at +
+                ", insertAt=" + insertAt +
                 '}';
     }
 }

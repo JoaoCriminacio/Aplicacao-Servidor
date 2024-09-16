@@ -1,59 +1,51 @@
 package com.unimater;
 
 import com.sun.net.httpserver.HttpServer;
-import com.unimater.controller.HelloWorldHandler;
-import com.unimater.dao.*;
-import com.unimater.model.ProductType;
-import com.unimater.dao.ProductDAO;
-import com.unimater.model.Product;
+import com.unimater.controller.*;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class App
-{
-    public static void main(String[] args) {
-        try{
+public class App {
+    public static void main( String[] args ){
+
+
+        try {
             HttpServer servidor = HttpServer.create(
-                    //Caminho de socket na porta 8080
-                    new InetSocketAddress(8080), 0
+                    new InetSocketAddress(8080),0
             );
-
-            servidor.createContext("/helloWorld", new HelloWorldHandler());
-
 
             Connection connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/your_db",
-                    "root",
-                    "root"
+                    "jdbc:mysql://localhost:3306/your_db", "root", "root"
             );
 
-            ProductTypeDAO productTypeDAO = new ProductTypeDAO(connection);
+            servidor.createContext("/helloWorld",
+                    new HelloWorldHandler());
 
-            //Update
-            ProductType alterar = new ProductType(4, "Alterando");
-            productTypeDAO.upsert(alterar);
+            servidor.createContext("/productType",
+                    new ProductTypeHandler(connection));
 
-            //Insert
-            ProductType criar = new ProductType(3, "Teste");
-            productTypeDAO.upsert(criar);
+            servidor.createContext("/product",
+                    new ProductHandler(connection));
 
-            //Select
-            System.out.println(productTypeDAO.getAll());
+            servidor.createContext("/sale",
+                    new SaleHandler(connection));
 
-            //Delete
-            productTypeDAO.delete(4);
+            servidor.createContext("/saleItem",
+                    new SaleItemHandler(connection));
 
-            //Executor: Numerar/reconhecer as threads
             servidor.setExecutor(null);
             servidor.start();
             System.out.println("Servidor rodando na porta 8080");
-        //IOException é um erro do tipo servidor
-        }catch (IOException | SQLException e){
+
+        } catch (IOException e) {
             System.out.println(e);
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
     }
 }

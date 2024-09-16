@@ -1,6 +1,6 @@
 package com.unimater.model;
 
-import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -11,14 +11,6 @@ public class Product implements Entity{
     private String description;
     private double value;
 
-    public Product(ResultSet rs, Connection connection) throws SQLException {
-        super();
-        this.id = rs.getInt("id");
-        this.productType = new ProductType(rs);
-        this.description = rs.getString("description");
-        this.value = rs.getDouble("value");
-    }
-
     public Product(int id, ProductType productType, String description, double value) {
         this.id = id;
         this.productType = productType;
@@ -26,8 +18,31 @@ public class Product implements Entity{
         this.value = value;
     }
 
-    public Product() {
+    public Product(ResultSet resultSet) throws SQLException{
+        this.id = resultSet.getInt("id");
+        this.description = resultSet.getString("description");
+        this.value = resultSet.getDouble("value");
+        this.productType = new ProductType(resultSet.getInt("product_type_id"));
+    }
 
+    public Product() {
+    }
+
+    public Product(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public Entity constructFromResultSet(ResultSet rs) throws SQLException {
+        return new Product(rs);
+    }
+
+    @Override
+    public PreparedStatement prepareStatement(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setInt(1, this.getProductType().getId());
+        preparedStatement.setString(2, getDescription());
+        preparedStatement.setDouble(3, getValue());
+        return preparedStatement;
     }
 
     public int getId() {
@@ -50,9 +65,8 @@ public class Product implements Entity{
         this.id = id;
     }
 
-    @Override
-    public Entity constructFromResultSet(ResultSet rs, Connection connection) throws SQLException {
-        return new Product(rs, connection);
+    public void setProductType(ProductType productType) {
+        this.productType = productType;
     }
 
     @Override
